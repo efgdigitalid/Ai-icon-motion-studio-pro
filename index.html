@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>AI Icon Motion Studio Pro — EFG Digital</title>
+<style>
+:root{
+  --bg-0:#0e0d0b;
+  --bg-1:#161411;
+  --bg-2:#1e1b17;
+  --panel:rgba(30,27,23,0.72);
+  --panel-border:rgba(212,175,110,0.14);
+  --gold:#d4af6e;
+  --gold-bright:#f0c987;
+  --ember:#c9683a;
+  --text-0:#f3ede2;
+  --text-1:#b8afa0;
+  --text-2:#7d7566;
+  --ok:#7fae7a;
+  --danger:#c96a5a;
+  --radius:14px;
+  --mono:'JetBrains Mono', ui-monospace, monospace;
+  --sans:'Manrope', -apple-system, sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg-0);color:var(--text-0);font-family:var(--sans);height:100%;overflow-x:hidden;}
+body{
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(212,175,110,0.10), transparent),
+    radial-gradient(ellipse 700px 500px at 100% 10%, rgba(201,104,58,0.08), transparent),
+    var(--bg-0);
+}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:#3a352c;border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+/* ---- top bar ---- */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 22px;border-bottom:1px solid var(--panel-border);
+  background:linear-gradient(180deg, rgba(20,18,15,0.9), rgba(20,18,15,0.6));
+  backdrop-filter:blur(10px);position:sticky;top:0;z-index:50;
+}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand-mark{
+  width:34px;height:34px;border-radius:9px;
+  background:conic-gradient(from 200deg, var(--gold), var(--ember), var(--gold));
+  display:flex;align-items:center;justify-content:center;font-weight:800;color:#161411;font-size:15px;
+  box-shadow:0 0 24px rgba(212,175,110,0.35);
+}
+.brand-name{font-weight:800;font-size:15.5px;letter-spacing:0.2px;}
+.brand-sub{font-size:11px;color:var(--text-2);font-family:var(--mono);letter-spacing:0.5px;}
+.tag-live{
+  font-family:var(--mono);font-size:10.5px;color:var(--ok);border:1px solid rgba(127,174,122,0.35);
+  padding:2px 8px;border-radius:20px;background:rgba(127,174,122,0.08);margin-left:8px;
+}
+
+/* ---- layout ---- */
+.workspace{display:grid;grid-template-columns:290px 1fr 340px;gap:14px;padding:14px;min-height:calc(100vh - 64px);}
+@media (max-width:1100px){.workspace{grid-template-columns:1fr;}}
+.panel{
+  background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius);
+  backdrop-filter:blur(14px);padding:16px;
+}
+.panel + .panel{margin-top:14px;}
+.panel-title{
+  font-size:11px;text-transform:uppercase;letter-spacing:1.4px;color:var(--gold);font-family:var(--mono);
+  margin-bottom:12px;display:flex;align-items:center;gap:8px;
+}
+.panel-title::before{content:'';width:14px;height:1px;background:var(--gold);opacity:0.6;}
+
+/* ---- tabs ---- */
+.tabs{display:flex;gap:4px;background:var(--bg-1);padding:4px;border-radius:10px;margin-bottom:14px;}
+.tab-btn{flex:1;padding:8px 6px;font-size:12px;border:none;background:transparent;color:var(--text-2);
+  border-radius:7px;cursor:pointer;font-family:var(--sans);font-weight:600;transition:.15s;}
+.tab-btn.active{background:var(--gold);color:#1c1712;}
+
+/* ---- template grid ---- */
+.tpl-search{
+  width:100%;padding:9px 12px;border-radius:9px;border:1px solid var(--panel-border);
+  background:var(--bg-1);color:var(--text-0);font-size:13px;margin-bottom:10px;font-family:var(--sans);
+}
+.tpl-search:focus{outline:none;border-color:var(--gold);}
+.tpl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:520px;overflow-y:auto;padding-right:2px;}
+.tpl-card{
+  border:1px solid var(--panel-border);border-radius:10px;padding:10px 8px;cursor:pointer;
+  background:var(--bg-1);transition:.15s;text-align:center;
+}
+.tpl-card:hover{border-color:var(--gold);transform:translateY(-1px);}
+.tpl-card.selected{border-color:var(--gold-bright);background:rgba(212,175,110,0.1);box-shadow:0 0 0 1px var(--gold-bright) inset;}
+.tpl-icon{font-size:22px;margin-bottom:6px;}
+.tpl-name{font-size:10.5px;color:var(--text-1);line-height:1.3;}
+.tpl-cat{font-size:8.5px;color:var(--text-2);font-family:var(--mono);text-transform:uppercase;margin-top:2px;}
+
+/* ---- upload zone ---- */
+.dropzone{
+  border:1.5px dashed var(--panel-border);border-radius:12px;padding:26px 12px;text-align:center;
+  cursor:pointer;transition:.15s;background:var(--bg-1);
+}
+.dropzone.drag{border-color:var(--gold);background:rgba(212,175,110,0.08);}
+.dropzone svg{opacity:0.6;margin-bottom:8px;}
+.dz-title{font-size:13px;font-weight:700;color:var(--text-0);}
+.dz-sub{font-size:11px;color:var(--text-2);margin-top:4px;}
+.file-list{margin-top:10px;display:flex;flex-direction:column;gap:6px;}
+.file-item{
+  display:flex;align-items:center;justify-content:space-between;background:var(--bg-1);
+  border:1px solid var(--panel-border);border-radius:8px;padding:7px 10px;font-size:11.5px;
+}
+.file-item button{background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px;}
+
+/* ---- center stage ---- */
+.stage-wrap{display:flex;flex-direction:column;gap:14px;}
+.stage{
+  background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius);
+  padding:16px;display:flex;flex-direction:column;align-items:center;gap:14px;
+}
+.canvas-frame{
+  position:relative;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  border:1px solid rgba(255,255,255,0.06);
+}
+#previewCanvas{display:block;background:
+  linear-gradient(45deg,#2a2620 25%,transparent 25%),
+  linear-gradient(-45deg,#2a2620 25%,transparent 25%),
+  linear-gradient(45deg,transparent 75%,#2a2620 75%),
+  linear-gradient(-45deg,transparent 75%,#2a2620 75%);
+  background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0px;background-color:#1a1712;
+}
+.transport{display:flex;align-items:center;gap:12px;width:100%;max-width:640px;}
+.play-btn{
+  width:42px;height:42px;border-radius:50%;background:var(--gold);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#1c1712;
+}
+.scrub{flex:1;-webkit-appearance:none;height:4px;border-radius:4px;background:var(--bg-2);cursor:pointer;}
+.scrub::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--gold-bright);cursor:pointer;box-shadow:0 0 8px rgba(240,201,135,0.6);}
+.time-lbl{font-family:var(--mono);font-size:11px;color:var(--text-1);min-width:70px;text-align:right;}
+
+.aspect-row,.bg-row{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{
+  padding:7px 12px;border-radius:8px;border:1px solid var(--panel-border);background:var(--bg-1);
+  font-size:11.5px;cursor:pointer;color:var(--text-1);transition:.15s;
+}
+.chip.active{background:var(--gold);color:#1c1712;border-color:var(--gold);font-weight:700;}
+.swatch{width:30px;height:30px;border-radius:8px;border:2px solid var(--panel-border);cursor:pointer;flex-shrink:0;}
+.swatch.active{border-color:var(--gold-bright);box-shadow:0 0 0 2px rgba(240,201,135,0.3);}
+
+/* ---- right panel controls ---- */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11.5px;color:var(--text-1);margin-bottom:6px;font-weight:600;}
+.field-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.field-row .val{font-family:var(--mono);color:var(--gold-bright);font-size:11px;}
+input[type=range]{width:100%;-webkit-appearance:none;height:4px;border-radius:4px;background:var(--bg-2);}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--gold);cursor:pointer;}
+select,input[type=text],input[type=password],textarea{
+  width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--panel-border);
+  background:var(--bg-1);color:var(--text-0);font-size:12.5px;font-family:var(--sans);
+}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--gold);}
+.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.preset-btn{
+  padding:9px 6px;font-size:11px;border-radius:8px;border:1px solid var(--panel-border);
+  background:var(--bg-1);color:var(--text-1);cursor:pointer;text-align:center;transition:.15s;
+}
+.preset-btn.active{background:linear-gradient(135deg,var(--gold),var(--ember));color:#1c1712;font-weight:700;border-color:transparent;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;}
+.toggle{width:38px;height:21px;border-radius:20px;background:var(--bg-2);position:relative;cursor:pointer;flex-shrink:0;}
+.toggle.on{background:var(--gold);}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#fff;transition:.15s;}
+.toggle.on::after{left:19px;}
+
+.btn-primary{
+  width:100%;padding:11px;border-radius:9px;border:none;background:linear-gradient(135deg,var(--gold),var(--ember));
+  color:#1c1712;font-weight:800;font-size:13px;cursor:pointer;letter-spacing:0.2px;
+}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed;}
+.btn-secondary{
+  width:100%;padding:10px;border-radius:9px;border:1px solid var(--panel-border);background:var(--bg-1);
+  color:var(--text-0);font-weight:700;font-size:12.5px;cursor:pointer;
+}
+.btn-ghost{background:none;border:1px solid var(--panel-border);color:var(--text-1);padding:6px 10px;border-radius:7px;font-size:11px;cursor:pointer;}
+
+.layer-row{
+  display:flex;align-items:center;gap:8px;background:var(--bg-1);border:1px solid var(--panel-border);
+  border-radius:8px;padding:8px;margin-bottom:6px;font-size:11.5px;
+}
+.layer-row.active{border-color:var(--gold);}
+.layer-thumb{width:26px;height:26px;border-radius:5px;background:var(--bg-2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.layer-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+.progress-wrap{margin-top:10px;height:6px;background:var(--bg-2);border-radius:6px;overflow:hidden;display:none;}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--gold),var(--ember));width:0%;transition:width .2s;}
+.status-txt{font-size:11px;color:var(--text-2);margin-top:6px;font-family:var(--mono);}
+
+.kw-box{
+  background:var(--bg-1);border:1px solid var(--panel-border);border-radius:9px;padding:10px;
+  font-size:11.5px;max-height:220px;overflow-y:auto;line-height:1.6;color:var(--text-1);
+}
+.kw-box b{color:var(--gold-bright);}
+.copy-btn{margin-top:8px;}
+
+.hint{font-size:10.5px;color:var(--text-2);margin-top:6px;line-height:1.5;}
+a.link{color:var(--gold-bright);text-decoration:none;}
+
+@media (max-width:1100px){
+  .tpl-grid{max-height:300px;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark">EFG</div>
+    <div>
+      <div class="brand-name">AI Icon Motion Studio Pro <span class="tag-live">MVP AKTIF</span></div>
+      <div class="brand-sub">EFG DIGITAL // MOTION ENGINE v1.0</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <button class="btn-ghost" id="apiKeyBtn">🔑 Gemini API Key</button>
+  </div>
+</div>
+
+<div class="workspace">
+
+  <!-- LEFT: Templates / Upload -->
+  <div>
+    <div class="panel">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="templates">Template</button>
+        <button class="tab-btn" data-tab="upload">Upload</button>
+      </div>
+
+      <div id="tab-templates">
+        <input class="tpl-search" id="tplSearch" placeholder="Cari template... (mis: growth, ai, crypto)">
+        <div class="tpl-grid" id="tplGrid"></div>
+        <div class="hint">Menampilkan <b id="tplCount">0</b> dari <span id="tplTotal">0</span> template kurasi. Upload ikon sendiri di tab Upload untuk hasil produksi.</div>
+      </div>
+
+      <div id="tab-upload" style="display:none;">
+        <div class="dropzone" id="dropzone">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6"><path d="M12 16V4M12 4l-5 5M12 4l5 5"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
+          <div class="dz-title">Drag & drop SVG / PNG transparan</div>
+          <div class="dz-sub">Bisa multi-file. Vector .AI/.EPS akan dibaca sebagai gambar preview.</div>
+        </div>
+        <input type="file" id="fileInput" accept=".svg,.png,image/svg+xml,image/png" multiple style="display:none">
+        <div class="file-list" id="fileList"></div>
+        <div class="hint">Format terbaik: SVG (bisa direcolor) atau PNG transparan resolusi tinggi.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Layers</div>
+      <div id="layerList"></div>
+      <button class="btn-secondary" id="addLayerBtn">+ Tambah Layer dari Seleksi</button>
+    </div>
+  </div>
+
+  <!-- CENTER: Stage -->
+  <div class="stage-wrap">
+    <div class="stage">
+      <div class="canvas-frame">
+        <canvas id="previewCanvas" width="640" height="360"></canvas>
+      </div>
+      <div class="transport">
+        <button class="play-btn" id="playBtn">▶</button>
+        <input type="range" class="scrub" id="scrub" min="0" max="1000" value="0">
+        <div class="time-lbl" id="timeLbl">0.00s / 2.00s</div>
+      </div>
+      <div style="width:100%;display:flex;gap:14px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:220px;">
+          <div class="panel-title" style="margin-bottom:8px;">Aspect Ratio</div>
+          <div class="aspect-row" id="aspectRow"></div>
+        </div>
+        <div style="flex:1;min-width:220px;">
+          <div class="panel-title" style="margin-bottom:8px;">Background</div>
+          <div class="bg-row" id="bgRow"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">AI Prompt Generator (Gemini)</div>
+      <textarea id="promptInput" rows="2" placeholder="Contoh: coin saving animation, business growth chart, AI robot futuristik..."></textarea>
+      <button class="btn-primary" id="promptGenBtn" style="margin-top:10px;">✨ Generate dari Prompt</button>
+      <div class="status-txt" id="promptStatus"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Animation / Timeline / Export -->
+  <div>
+    <div class="panel">
+      <div class="panel-title">Animation Engine</div>
+      <div class="preset-grid" id="presetGrid"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Timeline</div>
+      <div class="field">
+        <div class="field-row"><label>Duration</label><span class="val" id="durVal">2.0s</span></div>
+        <input type="range" id="durRange" min="0.5" max="8" step="0.1" value="2">
+      </div>
+      <div class="field">
+        <div class="field-row"><label>Delay</label><span class="val" id="delayVal">0.0s</span></div>
+        <input type="range" id="delayRange" min="0" max="3" step="0.1" value="0">
+      </div>
+      <div class="field">
+        <div class="field-row"><label>Speed</label><span class="val" id="speedVal">1.0x</span></div>
+        <input type="range" id="speedRange" min="0.25" max="3" step="0.05" value="1">
+      </div>
+      <div class="field">
+        <div class="field-row"><label>Easing</label></div>
+        <select id="easingSelect">
+          <option value="linear">Linear</option>
+          <option value="easeIn">Ease In</option>
+          <option value="easeOut" selected>Ease Out</option>
+          <option value="easeInOut">Ease In-Out</option>
+          <option value="elasticOut">Elastic</option>
+          <option value="bounceOut">Bounce</option>
+        </select>
+      </div>
+      <div class="toggle-row">
+        <label style="font-size:11.5px;color:var(--text-1);font-weight:600;">Loop Animation</label>
+        <div class="toggle" id="loopToggle"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Export</div>
+      <div class="field">
+        <label>Format</label>
+        <select id="formatSelect">
+          <option value="webm">Video WebM (VP9, transparan didukung)</option>
+          <option value="gif">GIF Animasi</option>
+          <option value="png">PNG Sequence (.zip)</option>
+          <option value="lottie">Lottie JSON (preset transform dasar)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Resolusi</label>
+        <select id="resSelect">
+          <option value="720">HD — 1280×720</option>
+          <option value="1080" selected>Full HD — 1920×1080</option>
+          <option value="1440">2K — 2560×1440</option>
+          <option value="2160">4K — 3840×2160</option>
+        </select>
+      </div>
+      <button class="btn-primary" id="exportBtn">⬇ Export Sekarang</button>
+      <div class="progress-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="status-txt" id="exportStatus"></div>
+      <div class="hint">MOV / H.264 asli & 4K encode penuh butuh proses server-side (FFmpeg) — belum tersedia di versi client-side ini.</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Stock Metadata Generator</div>
+      <button class="btn-secondary" id="metaGenBtn">🏷 Generate Title, Description & 49 Keywords</button>
+      <div class="status-txt" id="metaStatus"></div>
+      <div id="metaResult" style="margin-top:10px;display:none;">
+        <div class="kw-box" id="metaBox"></div>
+        <button class="btn-ghost copy-btn" id="metaCopyBtn">Copy semua</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+window.addEventListener('error', function(e){ console.error('Runtime error caught:', e.error||e.message); });
+
+let canvasWarningShown = false;
+const _loadedScripts = {};
+function loadScript(url){
+  if(_loadedScripts[url]) return _loadedScripts[url];
+  _loadedScripts[url] = new Promise((resolve, reject)=>{
+    const s = document.createElement('script');
+    s.src = url;
+    s.onload = ()=>resolve();
+    s.onerror = ()=>reject(new Error('Gagal memuat library dari '+url+' (cek koneksi internet)'));
+    document.head.appendChild(s);
+  });
+  return _loadedScripts[url];
+}
+
+/* ============ DATA: TEMPLATE LIBRARY ============ */
+const TEMPLATE_LIB = [
+["🐷","Coin Into Piggy Bank","Finance","assemble"],["📈","Growth Chart Up","Finance","flyIn"],
+["📉","Market Chart Down","Finance","slideLeft"],["🎯","Marketing Target Hit","Business","zoom"],
+["📊","Data Analysis Panel","Business","buildUp"],["💹","Stock Investment","Finance","pulse"],
+["👛","Digital Wallet","Fintech","scaleIn"],["🔳","QR Payment Scan","Fintech","pulse"],
+["📱","Mobile Banking","Fintech","flyIn"],["🔒","Data Security Shield","Tech","bounce"],
+["☁️","Cloud Computing","Tech","float"],["🤖","Artificial Intelligence Core","Tech","spin"],
+["🦾","AI Robot Arm","Tech","assemble"],["🛒","E-Commerce Cart","Retail","slideRight"],
+["🛍️","Shopping Bag","Retail","bounce"],["📦","Package Delivery","Logistics","flyIn"],
+["🚀","Startup Growth Rocket","Business","zoom"],["📱","Social Media Analytics","Marketing","buildUp"],
+["✉️","Email Marketing Send","Marketing","flyOut"],["₿","Cryptocurrency Coin","Finance","spin"],
+["🌱","Green Energy Leaf","Sustainability","float"],["☀️","Solar Panel Power","Energy","pulse"],
+["🌬️","Wind Turbine Spin","Energy","spin"],["🩺","Healthcare Cross","Medical","pulse"],
+["🎓","Education Graduate Cap","Education","bounce"],["🏙️","Smart City Skyline","Tech","parallax"],
+["🏠","Real Estate Home","Property","scaleIn"],["🤝","Teamwork Handshake","Business","assemble"],
+["🏆","Achievement Trophy","Business","zoom"],["⚡","Productivity Bolt","Business","elastic"],
+["🎧","Customer Support Headset","Service","float"],["🌐","Global Network Globe","Tech","orbit"],
+["🔄","Digital Transformation","Tech","morph"],["💳","Credit Card Payment","Fintech","slideLeft"],
+["📡","5G Network Signal","Tech","wave"],["🧠","Machine Learning Brain","AI","assemble"],
+["🔍","Search Analytics","Marketing","zoom"],["📅","Calendar Schedule","Productivity","buildUp"],
+["💡","Innovation Idea Bulb","Business","pulse"],["🔗","Blockchain Chain Link","Crypto","assemble"],
+["📶","Wifi Connectivity","Tech","wave"],["🖥️","Server Rack Data","Tech","buildUp"],
+["🎮","Gaming Controller","Entertainment","bounce"],["🎥","Video Content Play","Media","zoom"],
+["📸","Photography Camera","Media","scaleIn"],["🎵","Music Streaming Wave","Media","wave"],
+["✈️","Travel Airplane","Travel","flyIn"],["🚗","Electric Vehicle Car","Automotive","slideRight"],
+["🏭","Smart Factory","Industry","buildUp"],["🌾","AgriTech Farming","Agriculture","float"],
+["💊","Pharma Medicine","Medical","pulse"],["🧬","Biotech DNA Helix","Medical","spin"],
+["🛡️","Cybersecurity Shield","Tech","bounce"],["📈","KPI Dashboard","Business","buildUp"],
+["🗳️","Digital Voting","Government","assemble"],["🌦️","Weather Forecast","Utility","morph"],
+["🧾","Invoice Receipt","Finance","flyIn"],["🏦","Bank Building","Finance","scaleIn"],
+["📚","Online Learning Book","Education","buildUp"],["🧩","Puzzle Solution","Business","assemble"]
+].map((t,i)=>({id:i,icon:t[0],name:t[1],cat:t[2],preset:t[3]}));
+
+/* ============ EASING ============ */
+const EASE = {
+  linear:t=>t,
+  easeIn:t=>t*t,
+  easeOut:t=>1-Math.pow(1-t,2),
+  easeInOut:t=>t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2,
+  elasticOut:t=>{const c4=(2*Math.PI)/3; return t===0?0:t===1?1:Math.pow(2,-10*t)*Math.sin((t*10-0.75)*c4)+1;},
+  bounceOut:t=>{const n1=7.5625,d1=2.75; if(t<1/d1)return n1*t*t; if(t<2/d1)return n1*(t-=1.5/d1)*t+0.75; if(t<2.5/d1)return n1*(t-=2.25/d1)*t+0.9375; return n1*(t-=2.625/d1)*t+0.984375;}
+};
+
+const PRESETS = ["bounce","scaleIn","scaleOut","rotate","spin","zoom","flyIn","flyOut","slideLeft","slideRight",
+  "morph","pulse","float","explosion","buildUp","assemble","disassemble","wave","orbit","elastic","parallax","particle"];
+
+/* ============ STATE ============ */
+const state = {
+  layers: [], // {id, img, name, preset, w, h}
+  activeLayerId: null,
+  duration: 2.0, delay: 0, speed: 1.0, easing:"easeOut", loop:true,
+  aspect: "16:9", bg: {type:"gradient", value:["#2b2620","#12100c"]},
+  playing:false, t0:0, currentTime:0,
+  geminiKey: null
+};
+
+const ASPECTS = {"16:9":[1920,1080],"9:16":[1080,1920],"1:1":[1080,1080],"4:5":[1080,1350]};
+const BACKGROUNDS = [
+  {name:"Transparan", type:"transparent"},
+  {name:"Green Screen", type:"solid", value:"#00b140"},
+  {name:"Blue Screen", type:"solid", value:"#0047ab"},
+  {name:"Putih", type:"solid", value:"#ffffff"},
+  {name:"Hitam", type:"solid", value:"#0a0a0a"},
+  {name:"Gold Gradient", type:"gradient", value:["#3a2e1a","#0f0d0a"]},
+  {name:"Tech Blue", type:"gradient", value:["#0d2b45","#061018"]},
+  {name:"Business", type:"gradient", value:["#2a2a2a","#050505"]},
+  {name:"Finance Green", type:"gradient", value:["#1a3a2a","#0a120d"]},
+];
+
+/* ============ INIT UI ============ */
+const tplGrid = document.getElementById('tplGrid');
+function renderTemplates(filter=""){
+  tplGrid.innerHTML = "";
+  const f = filter.toLowerCase();
+  const filtered = TEMPLATE_LIB.filter(t=>!f || t.name.toLowerCase().includes(f) || t.cat.toLowerCase().includes(f));
+  document.getElementById('tplCount').textContent = filtered.length;
+  document.getElementById('tplTotal').textContent = TEMPLATE_LIB.length;
+  filtered.forEach(t=>{
+    const card = document.createElement('div');
+    card.className = 'tpl-card';
+    card.innerHTML = `<div class="tpl-icon">${t.icon}</div><div class="tpl-name">${t.name}</div><div class="tpl-cat">${t.cat}</div>`;
+    card.onclick = ()=> loadTemplateAsLayer(t);
+    tplGrid.appendChild(card);
+  });
+}
+renderTemplates();
+document.getElementById('tplSearch').oninput = e=>renderTemplates(e.target.value);
+
+function emojiToImage(emoji, cb){
+  const c = document.createElement('canvas'); c.width=200; c.height=200;
+  const ctx = c.getContext('2d');
+  ctx.font = "140px serif";
+  ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.fillText(emoji, 100, 110);
+  const img = new Image();
+  img.onload = ()=>cb(img);
+  img.src = c.toDataURL();
+}
+
+function loadTemplateAsLayer(t){
+  emojiToImage(t.icon, img=>{
+    addLayer(img, t.name, t.preset);
+    document.querySelectorAll('.tpl-card').forEach(c=>c.classList.remove('selected'));
+    event.currentTarget && event.currentTarget.classList.add('selected');
+  });
+}
+
+function addLayer(img, name, preset="bounce"){
+  const layer = {id:Date.now()+Math.random(), img, name, preset: preset};
+  state.layers.push(layer);
+  state.activeLayerId = layer.id;
+  renderLayers();
+  renderPresetGrid();
+  drawFrame(state.currentTime);
+}
+
+function renderLayers(){
+  const list = document.getElementById('layerList');
+  list.innerHTML = "";
+  if(state.layers.length===0){
+    list.innerHTML = `<div class="hint">Belum ada layer. Pilih template atau upload ikon.</div>`;
+    return;
+  }
+  state.layers.forEach(l=>{
+    const row = document.createElement('div');
+    row.className = 'layer-row' + (l.id===state.activeLayerId?' active':'');
+    row.innerHTML = `<div class="layer-thumb"><img src="${l.img.src}" style="width:18px;height:18px;object-fit:contain;"></div>
+      <div class="layer-name">${l.name}</div>
+      <button class="btn-ghost" style="padding:3px 7px;">✕</button>`;
+    row.onclick = (e)=>{ if(e.target.tagName==='BUTTON') return; state.activeLayerId = l.id; renderLayers(); renderPresetGrid(); };
+    row.querySelector('button').onclick = ()=>{ state.layers = state.layers.filter(x=>x.id!==l.id); if(state.activeLayerId===l.id) state.activeLayerId = state.layers[0]?.id || null; renderLayers(); renderPresetGrid(); };
+    list.appendChild(row);
+  });
+}
+renderLayers();
+
+document.getElementById('addLayerBtn').onclick = ()=>{
+  if(state.layers.length===0){ alert('Pilih template atau upload ikon dulu.'); return; }
+  const src = state.layers[state.layers.length-1];
+  addLayer(src.img, src.name+" (copy)", src.preset);
+};
+
+/* ---- Upload ---- */
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+dropzone.onclick = ()=>fileInput.click();
+['dragover','dragenter'].forEach(ev=>dropzone.addEventListener(ev, e=>{e.preventDefault(); dropzone.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>dropzone.addEventListener(ev, e=>{e.preventDefault(); dropzone.classList.remove('drag');}));
+dropzone.addEventListener('drop', e=>{ handleFiles(e.dataTransfer.files); });
+fileInput.onchange = e=>handleFiles(e.target.files);
+
+function handleFiles(files){
+  const list = document.getElementById('fileList');
+  Array.from(files).forEach(f=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        addLayer(img, f.name, "bounce");
+        const item = document.createElement('div');
+        item.className='file-item';
+        item.innerHTML = `<span>${f.name}</span>`;
+        list.appendChild(item);
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+/* ---- Tabs ---- */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-templates').style.display = btn.dataset.tab==='templates'?'block':'none';
+    document.getElementById('tab-upload').style.display = btn.dataset.tab==='upload'?'block':'none';
+  };
+});
+
+/* ---- Preset grid ---- */
+const presetGrid = document.getElementById('presetGrid');
+function renderPresetGrid(){
+  presetGrid.innerHTML = "";
+  const active = state.layers.find(l=>l.id===state.activeLayerId);
+  PRESETS.forEach(p=>{
+    const b = document.createElement('button');
+    b.className = 'preset-btn' + (active && active.preset===p ? ' active':'');
+    b.textContent = p;
+    b.onclick = ()=>{ if(!active){alert('Pilih layer dulu.');return;} active.preset = p; renderPresetGrid(); };
+    presetGrid.appendChild(b);
+  });
+}
+renderPresetGrid();
+
+/* ---- Aspect & Background ---- */
+const aspectRow = document.getElementById('aspectRow');
+Object.keys(ASPECTS).forEach(a=>{
+  const c = document.createElement('div');
+  c.className='chip'+(a===state.aspect?' active':'');
+  c.textContent = a;
+  c.onclick = ()=>{ state.aspect = a; document.querySelectorAll('#aspectRow .chip').forEach(x=>x.classList.remove('active')); c.classList.add('active'); resizeCanvas(); };
+  aspectRow.appendChild(c);
+});
+
+const bgRow = document.getElementById('bgRow');
+BACKGROUNDS.forEach((b,i)=>{
+  const sw = document.createElement('div');
+  sw.className = 'swatch'+(i===0?' active':'');
+  sw.title = b.name;
+  if(b.type==='transparent') sw.style.background = 'repeating-conic-gradient(#3a352c 0% 25%, #221f1a 0% 50%) 50% / 10px 10px';
+  else if(b.type==='solid') sw.style.background = b.value;
+  else sw.style.background = `linear-gradient(135deg, ${b.value[0]}, ${b.value[1]})`;
+  sw.onclick = ()=>{ state.bg = b; document.querySelectorAll('#bgRow .swatch').forEach(x=>x.classList.remove('active')); sw.classList.add('active'); };
+  bgRow.appendChild(sw);
+});
+
+/* ---- Timeline controls ---- */
+document.getElementById('durRange').oninput = e=>{ state.duration=+e.target.value; document.getElementById('durVal').textContent=state.duration.toFixed(1)+'s'; };
+document.getElementById('delayRange').oninput = e=>{ state.delay=+e.target.value; document.getElementById('delayVal').textContent=state.delay.toFixed(1)+'s'; };
+document.getElementById('speedRange').oninput = e=>{ state.speed=+e.target.value; document.getElementById('speedVal').textContent=state.speed.toFixed(2)+'x'; };
+document.getElementById('easingSelect').onchange = e=>{ state.easing = e.target.value; };
+const loopToggle = document.getElementById('loopToggle');
+loopToggle.classList.add('on');
+loopToggle.onclick = ()=>{ state.loop = !state.loop; loopToggle.classList.toggle('on', state.loop); };
+
+/* ============ CANVAS RENDER ENGINE ============ */
+const canvas = document.getElementById('previewCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas(){
+  const previewW = 640;
+  const [rw, rh] = ASPECTS[state.aspect];
+  const ratio = rh/rw;
+  canvas.width = previewW;
+  canvas.height = Math.round(previewW*ratio);
+  drawFrame(state.currentTime);
+}
+resizeCanvas();
+
+function drawBackground(c, cx){
+  if(!cx) return;
+  if(state.bg.type==='transparent'){ cx.clearRect(0,0,c.width,c.height); return; }
+  if(state.bg.type==='solid'){ cx.fillStyle = state.bg.value; cx.fillRect(0,0,c.width,c.height); return; }
+  const g = cx.createLinearGradient(0,0,c.width,c.height);
+  g.addColorStop(0, state.bg.value[0]); g.addColorStop(1, state.bg.value[1]);
+  cx.fillStyle = g; cx.fillRect(0,0,c.width,c.height);
+}
+
+// returns {x,y,scale,rot,opacity} offsets (x,y normalized -1..1 of half-canvas, scale multiplier, rot in rad, opacity 0-1)
+function getTransform(preset, rawT){
+  const e = EASE[state.easing] || EASE.easeOut;
+  const t = Math.max(0, Math.min(1, rawT));
+  const et = e(t);
+  switch(preset){
+    case "bounce": return {x:0,y:(1-et)*-0.4,scale:1,rot:0,opacity:1};
+    case "scaleIn": return {x:0,y:0,scale:0.2+0.8*et,rot:0,opacity:et};
+    case "scaleOut": return {x:0,y:0,scale:1.2-0.2*et,rot:0,opacity:1-et*0.0};
+    case "rotate": return {x:0,y:0,scale:1,rot:et*Math.PI*0.5,opacity:1};
+    case "spin": return {x:0,y:0,scale:1,rot:t*Math.PI*4,opacity:1};
+    case "zoom": return {x:0,y:0,scale:0.3+1.7*et,rot:0,opacity:Math.min(1,et*2)};
+    case "flyIn": return {x:(1-et)*-0.9,y:0,scale:1,rot:0,opacity:et};
+    case "flyOut": return {x:et*0.9,y:0,scale:1,rot:0,opacity:1-et};
+    case "slideLeft": return {x:(1-et)*0.9,y:0,scale:1,rot:0,opacity:et};
+    case "slideRight": return {x:(1-et)*-0.9,y:0,scale:1,rot:0,opacity:et};
+    case "morph": return {x:0,y:0,scale:0.85+0.3*Math.sin(t*Math.PI*2)*0.15+0.15,rot:Math.sin(t*Math.PI*2)*0.1,opacity:1};
+    case "pulse": return {x:0,y:0,scale:1+Math.sin(t*Math.PI*2*(state.loop?2:1))*0.08,rot:0,opacity:1};
+    case "float": return {x:0,y:Math.sin(t*Math.PI*2)*0.12,scale:1,rot:Math.sin(t*Math.PI*2)*0.04,opacity:1};
+    case "explosion": return {x:0,y:0,scale:1+et*1.4,rot:et*0.6,opacity:1-et};
+    case "buildUp": return {x:0,y:0,scale:1,rot:0,opacity:1,clip:et};
+    case "assemble": return {x:(1-et)*(Math.random()>0.5?0.7:-0.7)*0,y:(1-et)*-0.6,scale:0.6+0.4*et,rot:(1-et)*0.8,opacity:et};
+    case "disassemble": return {x:et*0.6,y:et*0.6,scale:1-et*0.3,rot:et*0.8,opacity:1-et};
+    case "wave": return {x:0,y:Math.sin(t*Math.PI*4)*0.15,scale:1,rot:Math.sin(t*Math.PI*4)*0.08,opacity:1};
+    case "orbit": return {x:Math.cos(t*Math.PI*2)*0.35,y:Math.sin(t*Math.PI*2)*0.2,scale:1,rot:0,opacity:1};
+    case "elastic": {const b=EASE.elasticOut(t); return {x:0,y:0,scale:0.3+0.7*b,rot:0,opacity:Math.min(1,t*3)};}
+    case "parallax": return {x:(0.5-et)*0.3,y:0,scale:1,rot:0,opacity:1,parallaxBg:true};
+    case "particle": return {x:0,y:0,scale:et,rot:0,opacity:et,particle:1-et};
+    default: return {x:0,y:0,scale:1,rot:0,opacity:1};
+  }
+}
+
+function localTimeFor(layer, globalT){
+  // globalT in seconds within duration window (loop-aware handled by caller)
+  const d = state.duration/state.speed;
+  const withDelay = globalT - state.delay;
+  if(withDelay < 0) return -1;
+  if(state.loop) return (withDelay % d)/d;
+  return Math.min(1, withDelay/d);
+}
+
+function drawFrame(timeSec){
+  if(!ctx){
+    if(!canvasWarningShown){
+      canvasWarningShown = true;
+      const el = document.getElementById('exportStatus');
+      if(el) el.textContent = 'Preview canvas tidak didukung di browser/preview ini. Coba buka file ini di Chrome/Safari langsung (bukan pratinjau dalam-app), atau upload ke Netlify.';
+    }
+    return;
+  }
+  drawBackground(canvas, ctx);
+  const cw = canvas.width, ch = canvas.height;
+  state.layers.forEach(layer=>{
+    const lt = localTimeFor(layer, timeSec);
+    if(lt < 0) return;
+    const tr = getTransform(layer.preset, lt);
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, Math.min(1, tr.opacity));
+    const cx0 = cw/2 + tr.x*cw*0.5;
+    const cy0 = ch/2 + tr.y*ch*0.5;
+    ctx.translate(cx0, cy0);
+    if(tr.rot) ctx.rotate(tr.rot);
+    const baseSize = Math.min(cw,ch)*0.42;
+    const size = baseSize*(tr.scale||1);
+    if(tr.particle){
+      // simple particle scatter render
+      const n = 10;
+      for(let i=0;i<n;i++){
+        const ang = (i/n)*Math.PI*2;
+        const dist = tr.particle*baseSize*0.9;
+        ctx.save();
+        ctx.globalAlpha *= (1-tr.particle*0.5);
+        ctx.translate(Math.cos(ang)*dist, Math.sin(ang)*dist);
+        ctx.drawImage(layer.img, -size*0.15, -size*0.15, size*0.3, size*0.3);
+        ctx.restore();
+      }
+    }
+    if(tr.clip !== undefined){
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(-size/2, size/2 - size*tr.clip, size, size*tr.clip);
+      ctx.clip();
+      ctx.drawImage(layer.img, -size/2, -size/2, size, size);
+      ctx.restore();
+    } else {
+      ctx.drawImage(layer.img, -size/2, -size/2, size, size);
+    }
+    ctx.restore();
+  });
+}
+
+/* ---- Playback loop ---- */
+const scrub = document.getElementById('scrub');
+const timeLbl = document.getElementById('timeLbl');
+const playBtn = document.getElementById('playBtn');
+let rafId = null;
+function totalDuration(){ return state.delay + state.duration/state.speed; }
+
+function tick(ts){
+  if(!state.playing) return;
+  if(!state.t0) state.t0 = ts;
+  let elapsed = (ts - state.t0)/1000;
+  const total = totalDuration();
+  if(!state.loop && elapsed > total){ elapsed = total; state.playing=false; playBtn.textContent='▶'; }
+  if(state.loop) elapsed = elapsed % Math.max(0.05,total);
+  state.currentTime = elapsed;
+  drawFrame(elapsed);
+  scrub.value = Math.round((elapsed/Math.max(0.05,total))*1000);
+  timeLbl.textContent = `${elapsed.toFixed(2)}s / ${total.toFixed(2)}s`;
+  if(state.playing) rafId = requestAnimationFrame(tick);
+}
+playBtn.onclick = ()=>{
+  state.playing = !state.playing;
+  playBtn.textContent = state.playing?'⏸':'▶';
+  if(state.playing){ state.t0=null; rafId = requestAnimationFrame(tick); }
+};
+scrub.oninput = ()=>{
+  state.playing=false; playBtn.textContent='▶';
+  const total = totalDuration();
+  state.currentTime = (scrub.value/1000)*total;
+  drawFrame(state.currentTime);
+  timeLbl.textContent = `${state.currentTime.toFixed(2)}s / ${total.toFixed(2)}s`;
+};
+setInterval(()=>{ if(!state.playing) drawFrame(state.currentTime); }, 300);
+
+/* ============ GEMINI API ============ */
+const hasStorage = (typeof window.storage !== 'undefined' && window.storage);
+let memKey = null; // fallback in-memory key if window.storage unavailable
+
+async function loadGeminiKey(){
+  if(!hasStorage) return;
+  try{
+    const r = await window.storage.get('gemini-api-key', false);
+    if(r && r.value) state.geminiKey = r.value;
+  }catch(e){}
+}
+loadGeminiKey();
+
+document.getElementById('apiKeyBtn').onclick = async ()=>{
+  const key = prompt('Masukkan Gemini API Key (gratis di aistudio.google.com/apikey). Disimpan untuk sesi ini.', state.geminiKey||'');
+  if(key){
+    state.geminiKey = key.trim();
+    if(hasStorage){
+      try{ await window.storage.set('gemini-api-key', state.geminiKey, false); }catch(e){}
+    }
+    alert('API Key tersimpan.');
+  }
+};
+
+async function callGemini(promptText){
+  if(!state.geminiKey){ alert('Masukkan Gemini API Key dulu (tombol di kanan atas).'); return null; }
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${state.geminiKey}`;
+  const body = { contents:[{parts:[{text: promptText}]}] };
+  const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  if(!res.ok){ const txt = await res.text(); throw new Error('Gemini API error: '+res.status+' '+txt.slice(0,200)); }
+  const data = await res.json();
+  const text = data.candidates?.[0]?.content?.parts?.map(p=>p.text).join('') || '';
+  return text;
+}
+
+document.getElementById('promptGenBtn').onclick = async ()=>{
+  const promptTxt = document.getElementById('promptInput').value.trim();
+  const statusEl = document.getElementById('promptStatus');
+  if(!promptTxt){ statusEl.textContent='Ketik deskripsi dulu.'; return; }
+  statusEl.textContent = 'Menghubungi Gemini...';
+  try{
+    const instruction = `Anda adalah AI motion design engine. Berdasarkan deskripsi berikut: "${promptTxt}", pilih SATU preset animasi terbaik dari daftar ini: [${PRESETS.join(', ')}], SATU background terbaik dari daftar ini: [${BACKGROUNDS.map(b=>b.name).join(', ')}], durasi ideal dalam detik (0.5-8), dan easing terbaik dari [linear, easeIn, easeOut, easeInOut, elasticOut, bounceOut]. Balas HANYA dengan JSON valid tanpa markdown, format persis: {"preset":"...","background":"...","duration":1.5,"easing":"...","note":"penjelasan singkat 1 kalimat dalam Bahasa Indonesia"}`;
+    const raw = await callGemini(instruction);
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    const active = state.layers.find(l=>l.id===state.activeLayerId) || state.layers[state.layers.length-1];
+    if(active && PRESETS.includes(parsed.preset)) active.preset = parsed.preset;
+    const bgMatch = BACKGROUNDS.find(b=>b.name.toLowerCase()===String(parsed.background||'').toLowerCase());
+    if(bgMatch) state.bg = bgMatch;
+    if(parsed.duration){ state.duration = Math.max(0.5,Math.min(8,parsed.duration)); document.getElementById('durRange').value=state.duration; document.getElementById('durVal').textContent=state.duration.toFixed(1)+'s'; }
+    if(parsed.easing){ state.easing = parsed.easing; document.getElementById('easingSelect').value = parsed.easing; }
+    renderPresetGrid();
+    statusEl.textContent = '✓ '+(parsed.note||'Animasi diterapkan.');
+    drawFrame(state.currentTime);
+  }catch(e){
+    statusEl.textContent = 'Gagal: '+e.message;
+  }
+};
+
+document.getElementById('metaGenBtn').onclick = async ()=>{
+  const statusEl = document.getElementById('metaStatus');
+  const active = state.layers.find(l=>l.id===state.activeLayerId) || state.layers[0];
+  if(!active){ statusEl.textContent='Pilih/upload ikon dulu.'; return; }
+  statusEl.textContent = 'Menghasilkan metadata...';
+  try{
+    const instruction = `Anda adalah spesialis SEO microstock. Untuk aset motion graphic bertema "${active.name}" dengan animasi "${active.preset}", buatkan metadata siap upload ke Adobe Stock, Shutterstock, Freepik, dan Dreamstime. Balas HANYA JSON valid tanpa markdown format persis: {"title":"...","description":"...(1-2 kalimat, dalam bahasa Inggris, gaya microstock)","keywords":["kw1","kw2",... total tepat 49 keyword relevan dalam bahasa Inggris, urut dari paling relevan]}`;
+    const raw = await callGemini(instruction);
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    document.getElementById('metaResult').style.display='block';
+    document.getElementById('metaBox').innerHTML = `<b>Title:</b> ${parsed.title}<br><br><b>Description:</b> ${parsed.description}<br><br><b>Keywords (${parsed.keywords.length}):</b><br>${parsed.keywords.join(', ')}`;
+    statusEl.textContent = '✓ Metadata siap.';
+    document.getElementById('metaCopyBtn').onclick = ()=>{
+      navigator.clipboard.writeText(`Title: ${parsed.title}\n\nDescription: ${parsed.description}\n\nKeywords: ${parsed.keywords.join(', ')}`);
+      document.getElementById('metaCopyBtn').textContent = 'Tersalin ✓';
+      setTimeout(()=>document.getElementById('metaCopyBtn').textContent='Copy semua',1500);
+    };
+  }catch(e){
+    statusEl.textContent = 'Gagal: '+e.message;
+  }
+};
+
+/* ============ EXPORT ============ */
+document.getElementById('exportBtn').onclick = async ()=>{
+  if(state.layers.length===0){ alert('Tambahkan minimal 1 layer/ikon dulu.'); return; }
+  const format = document.getElementById('formatSelect').value;
+  const resH = parseInt(document.getElementById('resSelect').value);
+  const [aw, ah] = ASPECTS[state.aspect];
+  const scaleFactor = resH/ah;
+  const outW = Math.round(aw*scaleFactor), outH = Math.round(ah*scaleFactor);
+
+  const statusEl = document.getElementById('exportStatus');
+  const progWrap = document.getElementById('progressWrap');
+  const progBar = document.getElementById('progressBar');
+  progWrap.style.display='block'; progBar.style.width='0%';
+  document.getElementById('exportBtn').disabled = true;
+  state.playing = false; playBtn.textContent='▶';
+
+  const off = document.createElement('canvas');
+  off.width = outW; off.height = outH;
+  const offCtx = off.getContext('2d');
+
+  const total = totalDuration();
+  const fps = 30;
+  const frameCount = Math.max(1, Math.round(total*fps));
+
+  function drawOffFrame(t){
+    // reuse drawBackground/drawFrame logic against off-canvas
+    const savedCanvas = canvas.width, savedH = canvas.height;
+    drawBackground(off, offCtx);
+    state.layers.forEach(layer=>{
+      const lt = localTimeFor(layer, t);
+      if(lt<0) return;
+      const tr = getTransform(layer.preset, lt);
+      offCtx.save();
+      offCtx.globalAlpha = Math.max(0,Math.min(1,tr.opacity));
+      const cx0 = outW/2 + tr.x*outW*0.5;
+      const cy0 = outH/2 + tr.y*outH*0.5;
+      offCtx.translate(cx0, cy0);
+      if(tr.rot) offCtx.rotate(tr.rot);
+      const baseSize = Math.min(outW,outH)*0.42;
+      const size = baseSize*(tr.scale||1);
+      if(tr.clip!==undefined){
+        offCtx.save(); offCtx.beginPath();
+        offCtx.rect(-size/2, size/2-size*tr.clip, size, size*tr.clip);
+        offCtx.clip();
+        offCtx.drawImage(layer.img, -size/2,-size/2,size,size);
+        offCtx.restore();
+      } else {
+        offCtx.drawImage(layer.img, -size/2,-size/2,size,size);
+      }
+      offCtx.restore();
+    });
+  }
+
+  try{
+    if(format==='png'){
+      statusEl.textContent = 'Memuat library ZIP...';
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+      statusEl.textContent = 'Merender PNG sequence...';
+      const zip = new JSZip();
+      for(let i=0;i<frameCount;i++){
+        drawOffFrame((i/fps));
+        const dataUrl = off.toDataURL('image/png');
+        zip.file(`frame_${String(i).padStart(4,'0')}.png`, dataUrl.split(',')[1], {base64:true});
+        progBar.style.width = Math.round((i/frameCount)*100)+'%';
+        if(i%5===0) await new Promise(r=>setTimeout(r,0));
+      }
+      statusEl.textContent = 'Membuat ZIP...';
+      const blob = await zip.generateAsync({type:'blob'});
+      downloadBlob(blob, 'ai-icon-motion-frames.zip');
+      statusEl.textContent = '✓ PNG sequence berhasil diexport.';
+    }
+    else if(format==='gif'){
+      statusEl.textContent = 'Memuat library GIF...';
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js');
+      statusEl.textContent = 'Merender GIF...';
+      const gif = new GIF({workers:2, quality:10, width:outW, height:outH, workerScript:'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'});
+      for(let i=0;i<frameCount;i++){
+        drawOffFrame(i/fps);
+        gif.addFrame(offCtx, {copy:true, delay:1000/fps});
+        progBar.style.width = Math.round((i/frameCount)*50)+'%';
+        if(i%5===0) await new Promise(r=>setTimeout(r,0));
+      }
+      gif.on('progress', p=>{ progBar.style.width = (50+Math.round(p*50))+'%'; });
+      gif.on('finished', blob=>{
+        downloadBlob(blob, 'ai-icon-motion.gif');
+        statusEl.textContent = '✓ GIF berhasil diexport.';
+        progWrap.style.display='none';
+        document.getElementById('exportBtn').disabled=false;
+      });
+      gif.render();
+      return;
+    }
+    else if(format==='webm'){
+      statusEl.textContent = 'Merekam video WebM...';
+      const stream = off.captureStream(fps);
+      const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
+      const recorder = new MediaRecorder(stream, {mimeType, videoBitsPerSecond: 8_000_000});
+      const chunks = [];
+      recorder.ondataavailable = e=>{ if(e.data.size>0) chunks.push(e.data); };
+      const recordDone = new Promise(resolve=>{ recorder.onstop = resolve; });
+      recorder.start();
+      let i=0;
+      const startTime = performance.now();
+      await new Promise(resolve=>{
+        function step(){
+          const elapsed = (performance.now()-startTime)/1000;
+          if(elapsed >= total){ resolve(); return; }
+          drawOffFrame(elapsed);
+          progBar.style.width = Math.round((elapsed/total)*100)+'%';
+          requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      });
+      recorder.stop();
+      await recordDone;
+      const blob = new Blob(chunks, {type:'video/webm'});
+      downloadBlob(blob, 'ai-icon-motion.webm');
+      statusEl.textContent = '✓ Video WebM berhasil diexport.';
+    }
+    else if(format==='lottie'){
+      statusEl.textContent = 'Membuat Lottie JSON...';
+      const layer = state.layers[0];
+      const lottie = buildSimpleLottie(layer, total, fps, outW, outH);
+      const blob = new Blob([JSON.stringify(lottie)], {type:'application/json'});
+      downloadBlob(blob, 'ai-icon-motion.json');
+      statusEl.textContent = '✓ Lottie JSON (preset transform dasar) berhasil diexport. Untuk preset non-transform (particle/morph/explosion) hasil disederhanakan.';
+    }
+  }catch(err){
+    statusEl.textContent = 'Gagal export: '+err.message;
+  }
+  progWrap.style.display='none';
+  document.getElementById('exportBtn').disabled=false;
+};
+
+function downloadBlob(blob, filename){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+function buildSimpleLottie(layer, total, fps, w, h){
+  const frames = Math.round(total*fps);
+  const ks_s = [], ks_p=[], ks_r=[], ks_o=[];
+  for(let i=0;i<=frames;i++){
+    const t = i/frames;
+    const lt = localTimeFor(layer, t*total);
+    const tr = getTransform(layer.preset, lt<0?0:lt);
+    ks_s.push({t:i, s:[100*(tr.scale||1)]});
+    ks_p.push({t:i, s:[w/2+tr.x*w*0.5, h/2+tr.y*h*0.5]});
+    ks_r.push({t:i, s:[(tr.rot||0)*180/Math.PI]});
+    ks_o.push({t:i, s:[Math.round((tr.opacity??1)*100)]});
+  }
+  return {
+    v:"5.9.0", fr:fps, ip:0, op:frames, w, h, nm:"AI Icon Motion Studio Pro Export", ddd:0,
+    assets:[{id:"image_0", w:200, h:200, u:"", p: layer.img.src, e:1}],
+    layers:[{
+      ddd:0, ind:1, ty:2, nm: layer.name, refId:"image_0",
+      ks:{
+        o:{a:1,k:ks_o}, r:{a:1,k:ks_r}, p:{a:1,k:ks_p}, a:{a:0,k:[100,100,0]}, s:{a:1,k:ks_s.map(k=>({t:k.t,s:[k.s[0],k.s[0],100]}))}
+      },
+      ao:0, ip:0, op:frames, st:0, bm:0
+    }]
+  };
+}
+</script>
+</body>
+</html>
