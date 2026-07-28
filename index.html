@@ -295,6 +295,17 @@ a.link{color:var(--gold-bright);text-decoration:none;}
     </div>
 
     <div class="panel">
+      <div class="panel-title">Warna Icon</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <input type="color" id="colorPicker" value="#d4af6e" style="width:44px;height:36px;border-radius:8px;border:1px solid var(--panel-border);background:var(--bg-1);cursor:pointer;padding:2px;">
+        <input type="text" id="colorHexInput" value="#D4AF6E" style="flex:1;font-family:var(--mono);text-transform:uppercase;">
+        <button class="btn-ghost" id="colorResetBtn" title="Kembalikan ke warna asli">↺</button>
+      </div>
+      <div class="bg-row" id="colorPresetsRow" style="margin-bottom:2px;"></div>
+      <div class="hint">Berlaku untuk layer yang sedang dipilih. Bekerja untuk SVG, PNG, maupun template bawaan.</div>
+    </div>
+
+    <div class="panel">
       <div class="panel-title">Timeline</div>
       <div class="field">
         <div class="field-row"><label>Duration</label><span class="val" id="durVal">2.0s</span></div>
@@ -489,11 +500,12 @@ function loadTemplateAsLayer(t){
 }
 
 function addLayer(img, name, preset="bounce"){
-  const layer = {id:Date.now()+Math.random(), img, name, preset: preset};
+  const layer = {id:Date.now()+Math.random(), img, name, preset: preset, color:null, _recolorCache:null};
   state.layers.push(layer);
   state.activeLayerId = layer.id;
   renderLayers();
   renderPresetGrid();
+  syncColorUI();
   drawFrame(state.currentTime);
 }
 
@@ -510,8 +522,8 @@ function renderLayers(){
     row.innerHTML = `<div class="layer-thumb"><img src="${l.img.src}" style="width:18px;height:18px;object-fit:contain;"></div>
       <div class="layer-name">${l.name}</div>
       <button class="btn-ghost" style="padding:3px 7px;">✕</button>`;
-    row.onclick = (e)=>{ if(e.target.tagName==='BUTTON') return; state.activeLayerId = l.id; renderLayers(); renderPresetGrid(); };
-    row.querySelector('button').onclick = ()=>{ state.layers = state.layers.filter(x=>x.id!==l.id); if(state.activeLayerId===l.id) state.activeLayerId = state.layers[0]?.id || null; renderLayers(); renderPresetGrid(); };
+    row.onclick = (e)=>{ if(e.target.tagName==='BUTTON') return; state.activeLayerId = l.id; renderLayers(); renderPresetGrid(); syncColorUI(); };
+    row.querySelector('button').onclick = ()=>{ state.layers = state.layers.filter(x=>x.id!==l.id); if(state.activeLayerId===l.id) state.activeLayerId = state.layers[0]?.id || null; renderLayers(); renderPresetGrid(); syncColorUI(); };
     list.appendChild(row);
   });
 }
@@ -575,6 +587,78 @@ function renderPresetGrid(){
   });
 }
 renderPresetGrid();
+
+/* ---- Icon Color Engine ---- */
+const COLOR_PRESETS = ["#d4af6e","#f0c987","#c9683a","#ffffff","#0a0a0a","#7fae7a","#5a8fc9","#c95a8f","#5ac9c0","#e0a020"];
+const colorPresetsRow = document.getElementById('colorPresetsRow');
+COLOR_PRESETS.forEach(hex=>{
+  const sw = document.createElement('div');
+  sw.className = 'swatch';
+  sw.style.background = hex;
+  sw.style.width='26px'; sw.style.height='26px';
+  sw.title = hex;
+  sw.onclick = ()=>applyColorToActiveLayer(hex);
+  colorPresetsRow.appendChild(sw);
+});
+
+function recolorImageToCanvas(img, hex){
+  const w = img.naturalWidth || img.width || 200;
+  const h = img.naturalHeight || img.height || 200;
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const cx = c.getContext('2d');
+  if(!cx) return img; // fallback: canvas unsupported, return original
+  cx.drawImage(img, 0, 0, w, h);
+  cx.globalCompositeOperation = 'source-atop';
+  cx.fillStyle = hex;
+  cx.fillRect(0, 0, w, h);
+  cx.globalCompositeOperation = 'source-over';
+  return c;
+}
+
+// Returns the drawable image/canvas for a layer, applying cached recolor if set.
+function getRenderableImage(layer){
+  if(!layer.color) return layer.img;
+  if(layer._recolorCache && layer._recolorCache.color === layer.color) return layer._recolorCache.canvas;
+  const canvas = recolorImageToCanvas(layer.img, layer.color);
+  layer._recolorCache = {color: layer.color, canvas};
+  return canvas;
+}
+
+function applyColorToActiveLayer(hex){
+  const active = state.layers.find(l=>l.id===state.activeLayerId);
+  if(!active){ alert('Pilih layer dulu.'); return; }
+  active.color = hex;
+  active._recolorCache = null;
+  syncColorUI();
+  drawFrame(state.currentTime);
+}
+
+function syncColorUI(){
+  const active = state.layers.find(l=>l.id===state.activeLayerId);
+  const picker = document.getElementById('colorPicker');
+  const hexInput = document.getElementById('colorHexInput');
+  const hex = (active && active.color) ? active.color : '#d4af6e';
+  picker.value = hex;
+  hexInput.value = hex.toUpperCase();
+}
+
+document.getElementById('colorPicker').oninput = e=>applyColorToActiveLayer(e.target.value);
+document.getElementById('colorHexInput').onchange = e=>{
+  let v = e.target.value.trim();
+  if(!v.startsWith('#')) v = '#'+v;
+  if(/^#[0-9A-Fa-f]{6}$/.test(v)) applyColorToActiveLayer(v);
+  else { alert('Format warna tidak valid. Gunakan HEX, contoh: #D4AF6E'); syncColorUI(); }
+};
+document.getElementById('colorResetBtn').onclick = ()=>{
+  const active = state.layers.find(l=>l.id===state.activeLayerId);
+  if(!active){ return; }
+  active.color = null;
+  active._recolorCache = null;
+  syncColorUI();
+  drawFrame(state.currentTime);
+};
+syncColorUI();
 
 /* ---- Aspect & Background ---- */
 const aspectRow = document.getElementById('aspectRow');
@@ -686,6 +770,7 @@ function drawFrame(timeSec){
     const lt = localTimeFor(layer, timeSec);
     if(lt < 0) return;
     const tr = getTransform(layer.preset, lt);
+    const renderImg = getRenderableImage(layer);
     ctx.save();
     ctx.globalAlpha = Math.max(0, Math.min(1, tr.opacity));
     const cx0 = cw/2 + tr.x*cw*0.5;
@@ -703,7 +788,7 @@ function drawFrame(timeSec){
         ctx.save();
         ctx.globalAlpha *= (1-tr.particle*0.5);
         ctx.translate(Math.cos(ang)*dist, Math.sin(ang)*dist);
-        ctx.drawImage(layer.img, -size*0.15, -size*0.15, size*0.3, size*0.3);
+        ctx.drawImage(renderImg, -size*0.15, -size*0.15, size*0.3, size*0.3);
         ctx.restore();
       }
     }
@@ -712,10 +797,10 @@ function drawFrame(timeSec){
       ctx.beginPath();
       ctx.rect(-size/2, size/2 - size*tr.clip, size, size*tr.clip);
       ctx.clip();
-      ctx.drawImage(layer.img, -size/2, -size/2, size, size);
+      ctx.drawImage(renderImg, -size/2, -size/2, size, size);
       ctx.restore();
     } else {
-      ctx.drawImage(layer.img, -size/2, -size/2, size, size);
+      ctx.drawImage(renderImg, -size/2, -size/2, size, size);
     }
     ctx.restore();
   });
@@ -779,15 +864,36 @@ document.getElementById('apiKeyBtn').onclick = async ()=>{
   }
 };
 
-async function callGemini(promptText){
+async function callGemini(promptText, onRetryStatus){
   if(!state.geminiKey){ alert('Masukkan Gemini API Key dulu (tombol di kanan atas).'); return null; }
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${state.geminiKey}`;
   const body = { contents:[{parts:[{text: promptText}]}] };
-  const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
-  if(!res.ok){ const txt = await res.text(); throw new Error('Gemini API error: '+res.status+' '+txt.slice(0,200)); }
-  const data = await res.json();
-  const text = data.candidates?.[0]?.content?.parts?.map(p=>p.text).join('') || '';
-  return text;
+  const maxAttempts = 3;
+  let lastErr = null;
+  for(let attempt=1; attempt<=maxAttempts; attempt++){
+    const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+    if(res.ok){
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.map(p=>p.text).join('') || '';
+      return text;
+    }
+    if(res.status === 429 || res.status === 503){
+      lastErr = new Error(res.status===429
+        ? 'Kuota Gemini API habis (limit gratis per menit/hari tercapai).'
+        : 'Server Gemini sedang sibuk.');
+      if(attempt < maxAttempts){
+        const waitSec = attempt * 4;
+        if(onRetryStatus) onRetryStatus(`${lastErr.message} Mencoba lagi dalam ${waitSec}s... (percobaan ${attempt}/${maxAttempts})`);
+        await new Promise(r=>setTimeout(r, waitSec*1000));
+        continue;
+      }
+      lastErr.message += ' Silakan tunggu beberapa menit, atau cek limit/billing di aistudio.google.com/apikey.';
+      throw lastErr;
+    }
+    const txt = await res.text();
+    throw new Error('Gemini API error '+res.status+': '+txt.slice(0,180));
+  }
+  throw lastErr;
 }
 
 document.getElementById('promptGenBtn').onclick = async ()=>{
@@ -797,7 +903,7 @@ document.getElementById('promptGenBtn').onclick = async ()=>{
   statusEl.textContent = 'Menghubungi Gemini...';
   try{
     const instruction = `Anda adalah AI motion design engine. Berdasarkan deskripsi berikut: "${promptTxt}", pilih SATU preset animasi terbaik dari daftar ini: [${PRESETS.join(', ')}], SATU background terbaik dari daftar ini: [${BACKGROUNDS.map(b=>b.name).join(', ')}], durasi ideal dalam detik (0.5-8), dan easing terbaik dari [linear, easeIn, easeOut, easeInOut, elasticOut, bounceOut]. Balas HANYA dengan JSON valid tanpa markdown, format persis: {"preset":"...","background":"...","duration":1.5,"easing":"...","note":"penjelasan singkat 1 kalimat dalam Bahasa Indonesia"}`;
-    const raw = await callGemini(instruction);
+    const raw = await callGemini(instruction, msg=>{ statusEl.textContent = msg; });
     const clean = raw.replace(/```json|```/g,'').trim();
     const parsed = JSON.parse(clean);
     const active = state.layers.find(l=>l.id===state.activeLayerId) || state.layers[state.layers.length-1];
@@ -821,7 +927,7 @@ document.getElementById('metaGenBtn').onclick = async ()=>{
   statusEl.textContent = 'Menghasilkan metadata...';
   try{
     const instruction = `Anda adalah spesialis SEO microstock. Untuk aset motion graphic bertema "${active.name}" dengan animasi "${active.preset}", buatkan metadata siap upload ke Adobe Stock, Shutterstock, Freepik, dan Dreamstime. Balas HANYA JSON valid tanpa markdown format persis: {"title":"...","description":"...(1-2 kalimat, dalam bahasa Inggris, gaya microstock)","keywords":["kw1","kw2",... total tepat 49 keyword relevan dalam bahasa Inggris, urut dari paling relevan]}`;
-    const raw = await callGemini(instruction);
+    const raw = await callGemini(instruction, msg=>{ statusEl.textContent = msg; });
     const clean = raw.replace(/```json|```/g,'').trim();
     const parsed = JSON.parse(clean);
     document.getElementById('metaResult').style.display='block';
@@ -869,6 +975,7 @@ document.getElementById('exportBtn').onclick = async ()=>{
       const lt = localTimeFor(layer, t);
       if(lt<0) return;
       const tr = getTransform(layer.preset, lt);
+      const renderImg = getRenderableImage(layer);
       offCtx.save();
       offCtx.globalAlpha = Math.max(0,Math.min(1,tr.opacity));
       const cx0 = outW/2 + tr.x*outW*0.5;
@@ -881,10 +988,10 @@ document.getElementById('exportBtn').onclick = async ()=>{
         offCtx.save(); offCtx.beginPath();
         offCtx.rect(-size/2, size/2-size*tr.clip, size, size*tr.clip);
         offCtx.clip();
-        offCtx.drawImage(layer.img, -size/2,-size/2,size,size);
+        offCtx.drawImage(renderImg, -size/2,-size/2,size,size);
         offCtx.restore();
       } else {
-        offCtx.drawImage(layer.img, -size/2,-size/2,size,size);
+        offCtx.drawImage(renderImg, -size/2,-size/2,size,size);
       }
       offCtx.restore();
     });
